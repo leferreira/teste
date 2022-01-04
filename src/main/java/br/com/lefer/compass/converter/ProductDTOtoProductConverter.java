@@ -5,7 +5,7 @@ import br.com.lefer.compass.entity.Product;
 
 public class ProductDTOtoProductConverter {
 	
-	public Product converter(ProductDTO productDTO) {
+	public static Product converter(ProductDTO productDTO) {
 		return Product.builder()
 				.name(productDTO.getName())
 				.description(productDTO.getDescription())
