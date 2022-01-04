@@ -38,9 +38,9 @@ public class ProductService {
 	}
 
 	public Product findById(Integer id) {
-		return ofNullable(productRepository.findById(id).get())
+		return productRepository.findById(id) 
 				.orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND,
-						"N\u00E3o foi poss\u00EDvel obter um o produto solicitado"));
+						"N\u00E3o foi poss\u00EDvel encontrar o produto informado"));
 	}
 
 	public void deleteById(Integer id) {

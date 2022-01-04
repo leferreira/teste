@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
 import br.com.lefer.compass.dto.ProductDTO;
 import br.com.lefer.compass.entity.Product;
@@ -57,6 +58,8 @@ public class ProductController {
 		return productService.findAll();
 	}
 
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpURLConnection.HTTP_NOT_FOUND, message = "Produto não encontrado"), })
 	@GetMapping("/{id}")
 	@ApiOperation("Busca um produto a partir do id informado")
 	public Product getProductById(@PathVariable Integer id) {
@@ -75,10 +78,10 @@ public class ProductController {
 		return productService.updateProduct(id, newProduct);
 	}
 
-	@GetMapping("/{search}")
-	public List<Product> search(@RequestParam(required = false) String q,
-			@RequestParam(required = false) BigDecimal minPrice, 
-			@RequestParam(required = false) BigDecimal maxPrice) {
+	@GetMapping("/search/{min_price}/{max_price}/{q}")
+	public List<Product> search(@RequestParam(required = false, name = "q") String q,
+			@RequestParam(required = false, name = "min_price") BigDecimal minPrice,
+			@RequestParam(required = false, name = "max_price") BigDecimal maxPrice) {
 		return productService.searchProducts(q, minPrice, maxPrice);
 	}
 
@@ -92,6 +95,18 @@ public class ProductController {
 			String errorMessage = error.getDefaultMessage();
 			errors.put(fieldName, errorMessage);
 		});
+		return errors;
+	}
+
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(HttpClientErrorException.class)
+	public Map<String, String> handleHttpClientErrorExceptions(HttpClientErrorException ex) {
+		log.error(ex.getMessage());
+		Map<String, String> errors = new HashMap<>();
+		HttpStatus statusCode = ex.getStatusCode();
+		String errorMessage = ex.getMessage();
+		errors.put("status_code", String.valueOf(statusCode.value()));
+		errors.put("message", errorMessage);
 		return errors;
 	}
 
